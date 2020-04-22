@@ -1,4 +1,4 @@
-## My Project
+## AWS Transit Gateway Peering CDK Solution
 
 Creating a global network with AWS Transit Gateway Peering and CDK
 
