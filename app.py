@@ -2,7 +2,6 @@
 
 from aws_cdk import core
 from stacks.networks import Network
-# from stacks.routes import Route
 from stacks.ec2 import Ec2
 
 app = core.App()
