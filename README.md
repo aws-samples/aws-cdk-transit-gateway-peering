@@ -12,15 +12,6 @@ While the transit gateway only connects to VPCs within the same region, you can 
 
 ## Deployment Steps
 
-In this section you will familiarize yourself with using [AWS Cloud Development Kit](https://docs.aws.amazon.com/cdk/latest/guide/home.html) (CDK) by downloading and deploying an egress VPC demo into your AWS account.
-
-This will include:
-
-- Installing CDK and closing this [demo repository](https://github.com/aws-samples/aws-transit-gateway-egress-vpc-pattern)
-- Deploying the example environment into your AWS account
-- Familiarizing yourself with the egress VPC pattern and the associated constructs and routing
-- Securely accessing the shell of a fully private EC2 instance via [AWS Systems Manager Session Manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html)
-
 Pre-requisites:
 
 -	an [AWS account](https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fportal.aws.amazon.com%2Fbilling%2Fsignup%2Fresume&client_id=signup)
