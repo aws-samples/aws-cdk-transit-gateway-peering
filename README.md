@@ -55,8 +55,9 @@ The code in the github project will deploy the resources required for the soluti
 
 The deployment is divided into four stacks, two in each region. The first is the network deployment and the second is the deployment of the EC2 instances, and there is an explicit dependency stated that the EC2 stack depends on the network stack.
 
-The relevant code in the app.py file is shown below:
+The relevant code in the `app.py` file is shown below:
 
+```
 network_stack_us_east_1 = Network(app, "network-stack-us-east-1",
         cidr_range="172.16.0.0/24",
         tgw_asn=64512,
@@ -88,9 +89,11 @@ ec2_stack_eu_west_1 = Ec2(app, id="instance-stack-eu-west-1",
     )
 ec2_stack_us_east_1.add_dependency(network_stack_us_east_1)
 ec2_stack_eu_west_1.add_dependency(network_stack_eu_west_1)
+```
 
 Once the stacks have successfully been deployed, utilize the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) to establish a peering connection between the two transit gateways. Presently, the AWS CDK does not yet natively support the provisioning of peering connections.
 
+```
 tgw_us_east_1=$(aws ec2 describe-transit-gateways \
 --region us-east-1 --filters "Name=state,Values=available" \
 --query "TransitGateways[*].TransitGatewayId" --output text)
@@ -113,23 +116,31 @@ attachment_id=$(aws ec2 describe-transit-gateway-peering-attachments \
 --region us-east-1 \
 --query "TransitGatewayPeeringAttachments[].TransitGatewayAttachmentId" \
 --output text)
+```
 
 It takes about thirty seconds for peering connection’s state change to change from “initiatingRequest” to “pendingAcceptance”. Run the following command to validate that the peering connection’s state is showing as “pendingAcceptance”:
 
+```
 aws ec2 describe-transit-gateway-peering-attachments --region us-east-1
+```
 
 Accept the peering request:
 
+```
 aws ec2 accept-transit-gateway-peering-attachment \
 --transit-gateway-attachment-id $attachment_id \
 --region eu-west-1
+```
 
 It can take up to 10 minutes for the peering connection to be established. Run the following command to validate that the peering connection’s state is showing as “available”:
 
+```
 aws ec2 describe-transit-gateway-peering-attachments --region us-east-1
+```
 
 Update the route tables on each of the transit gateways:
 
+```
 tgw_rt_id_us_east_1=$(aws ec2 describe-transit-gateway-attachments \
 --region us-east-1 \
 --filters Name=resource-type,Values=peering Name=state,Values=available \
@@ -165,6 +176,7 @@ aws ec2 create-transit-gateway-route \
 --transit-gateway-route-table-id $tgw_rt_id_eu_west_1 \
 --transit-gateway-attachment-id $tgw_attachment_id_eu_west_1 \
 --region eu-west-1
+```
 
 ## Verification Steps
 
@@ -198,7 +210,7 @@ Delete the transit gateway peering attachment in one of the regions:
 Terminate the rest of the resources with the following command:
 `cdk destroy "*"`
 
-When asked to confirm the deletion of the four stacks, select “y”.
+When asked to confirm the deletion of the four stacks, select `"y"`.
 
 ## License
 
