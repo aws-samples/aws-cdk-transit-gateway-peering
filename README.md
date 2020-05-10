@@ -14,11 +14,7 @@ While the transit gateway only connects to VPCs within the same region, you can 
 
 Pre-requisites:
 
--	an [AWS account](https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fportal.aws.amazon.com%2Fbilling%2Fsignup%2Fresume&client_id=signup)
--	Installed and authenticated [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
--	Installed [Python 3.6+](https://www.python.org/downloads/)
--	Installed [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html#getting_started_install)
--	[AWS account](https://aws.amazon.com/)
+-	an [AWS account](https://aws.amazon.com/)
 -	[AWS CLI, authenticated and configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
 -	[Python 3.6+](https://www.python.org/downloads/)
 -	[AWS SDK for Python (Boto3)](https://aws.amazon.com/sdk-for-python/)
