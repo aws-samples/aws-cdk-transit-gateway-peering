@@ -4,7 +4,7 @@
 
 ## Solution Overview
 
-The following diagram will be our CDK project's reference point.
+The following diagram will be referred to throughout this project.
 
 ![Diagram](img/TGW_peering_CDK_diagram.png)
 
@@ -18,44 +18,53 @@ Pre-requisites:
 -	Installed and authenticated [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
 -	Installed [Python 3.6+](https://www.python.org/downloads/)
 -	Installed [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html#getting_started_install)
+-	[AWS account](https://aws.amazon.com/)
+-	[AWS CLI, authenticated and configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
+-	[Python 3.6+](https://www.python.org/downloads/)
+-	[AWS SDK for Python (Boto3)](https://aws.amazon.com/sdk-for-python/)
+-	[AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html#getting_started_install)
+-	[Git](http://git-scm.com/downloads)
 
-Using your device’s command line, check out the Git repository to a local directory on your device:
+Step 1: Using your device’s command line, check out our Git repository to a local directory on your device:
+
 `git clone https://github.com/aws-samples/aws-cdk-transit-gateway-peering`
 
-Manually create a virtualenv on MacOS and Linux:
-`python3 -m venv .env`
+Step 2: Change directories to the new directory that was created:
 
-After the init process completes and the virtualenv is created, activate your virtualenv:
-`source .env/bin/activate`
+`cd aws-cdk-transit-gateway-peering/`
 
-(optional) If you’re using Windows, you would activate the virtualenv like this:
-`.env\Scripts\activate.bat`
+Step 3: Create a virtual environment:
 
-Install the required dependencies:
-`pip install -r requirements.txt`
+MacOS/Linux: `python3 -m venv .env`
+Windows: `python -m venv .env`
 
-Synthesize the CloudFormation template for this code to verify that all the requirements are installed and available:
-`cdk synth`
+Step 4: After the init process completes and the virtual environment is created, activate it:
 
-Deploy the solution:
-`cdk deploy "*"`
+MacOS/Linux: `source .env/bin/activate`
+Windows: `.env\Scripts\activate.bat`
 
-By default, some actions that could potentially make sensitive security changes, require approval. In this deployment, you will be creating an IAM role for the EC2 instances and creating security groups. Whenever prompted, enter “y”:
+Step 5: Install the required dependencies:
 
-![Diagram](img/TGW_peering_CDK_prompt.png)
+`pip3 install -r requirements.txt`
 
-You can override this prompt by providing an additional flag to the deployment command:
+Step 6: Synthesize the templates. Note that because AWS CDK apps are only a definition of the infrastructure using code, when they’re executed they produce, or “synthesize” an AWS CloudFormation template for each stack defined in the application:
+
+`cdk synthesize`
+
+Step 7: Deploy the solution. By default, some actions could potentially make security changes, require approval. In this deployment, you will be creating an IAM role for the EC2 instances and creating security groups. The following command will override the approval prompts but if you would like to manually accept the prompts, omit the “—require-approval never” flag:
+
 `cdk deploy "*" --require-approval never`
 
 While the AWS CDK deploys the CloudFormation stacks, you can follow the deployment progress in your terminal:
 
 ![Diagram](img/TGW_peering_CDK_stack_deployment.png)
 
-The code in the github project will deploy the resources required for the solution in both regions, including VPCs, transit gateways and EC2 instances.
+The code in the GitHub project will deploy the resources required for the solution in both regions, us-east-1 and eu-west-1, including VPCs, transit gateways and EC2 instances.
 
-The deployment is divided into four stacks, two in each region. The first is the network deployment and the second is the deployment of the EC2 instances, and there is an explicit dependency stated that the EC2 stack depends on the network stack.
+The deployment is divided into four stacks, two per region. The first is the deployment of the network and the second is the deployment of the EC2 instances, and there is an explicit dependency stated that the EC2 stack depends on the network stack.
 
 The relevant code in the `app.py` file is shown below:
+
 
 ```
 network_stack_us_east_1 = Network(app, "network-stack-us-east-1",
@@ -91,92 +100,27 @@ ec2_stack_us_east_1.add_dependency(network_stack_us_east_1)
 ec2_stack_eu_west_1.add_dependency(network_stack_eu_west_1)
 ```
 
-Once the stacks have successfully been deployed, utilize the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) to establish a peering connection between the two transit gateways. Presently, the AWS CDK does not yet natively support the provisioning of peering connections.
+Step 8: Once the stacks have successfully been deployed, you’ll execute a series of Python scripts which were obtained when you checked out our Git repo during step 1. Python scripts are required as transit gateway peering is not yet natively supported by AWS CloudFormation. The first script establishes the transit gateway peering connection:
 
-```
-tgw_us_east_1=$(aws ec2 describe-transit-gateways \
---region us-east-1 --filters "Name=state,Values=available" \
---query "TransitGateways[*].TransitGatewayId" --output text)
+`python create-tgw-peering.py`
 
-tgw_eu_west_1=$(aws ec2 describe-transit-gateways \
---region eu-west-1 --filters "Name=state,Values=available" \
---query "TransitGateways[*].TransitGatewayId" --output text)
+Initially, the peering connection’s state change will show as “initiatingRequest” but it’ll only remain that way for less than a minute. Run the following command every so often and validate that the peering connection’s state is showing as “pendingAcceptance” before proceeding to the next step:
 
-account_id=$(aws ec2 describe-transit-gateways \
---region us-east-1 --filters "Name=state,Values=available" \
---query "TransitGateways[*].OwnerId" --output text)
+`aws ec2 describe-transit-gateway-peering-attachments --region us-east-1`
 
-aws ec2 create-transit-gateway-peering-attachment \
---transit-gateway-id $tgw_us_east_1 \
---peer-transit-gateway-id $tgw_eu_west_1 \
---peer-account-id $account_id --peer-region eu-west-1 \
---region us-east-1
+Step 9: Accept the peering request:
 
-attachment_id=$(aws ec2 describe-transit-gateway-peering-attachments \
---region us-east-1 \
---query "TransitGatewayPeeringAttachments[].TransitGatewayAttachmentId" \
---output text)
-```
+`python accept-tgw-peering.py`
 
-It takes about thirty seconds for peering connection’s state change to change from “initiatingRequest” to “pendingAcceptance”. Run the following command to validate that the peering connection’s state is showing as “pendingAcceptance”:
+Shortly after accepting the peering request, the peering connection’s state will show as “pending”. After a few minutes, run the following command every so often and ensure that the peering connection’s state is showing as “available” before moving on to step 10:
 
-```
-aws ec2 describe-transit-gateway-peering-attachments --region us-east-1
-```
+`aws ec2 describe-transit-gateway-peering-attachments --region us-east-1`
 
-Accept the peering request:
+Step 10: Once the peering connection has changed to “available”, add a route to the each of the transit gateways’ route table:
 
-```
-aws ec2 accept-transit-gateway-peering-attachment \
---transit-gateway-attachment-id $attachment_id \
---region eu-west-1
-```
+`python create-tgw-routes.py`
 
-It can take up to 10 minutes for the peering connection to be established. Run the following command to validate that the peering connection’s state is showing as “available”:
-
-```
-aws ec2 describe-transit-gateway-peering-attachments --region us-east-1
-```
-
-Update the route tables on each of the transit gateways:
-
-```
-tgw_rt_id_us_east_1=$(aws ec2 describe-transit-gateway-attachments \
---region us-east-1 \
---filters Name=resource-type,Values=peering Name=state,Values=available \
---query "TransitGatewayAttachments[*].Association.TransitGatewayRouteTableId" \
---output text)
-
-tgw_attachment_id_us_east_1=$(aws ec2 describe-transit-gateway-attachments \
---region us-east-1 \
---filters Name=resource-type,Values=peering Name=state,Values=available \
---query "TransitGatewayAttachments[*].TransitGatewayAttachmentId" \
---output text)
-
-aws ec2 create-transit-gateway-route \
---destination-cidr-block 172.16.1.0/24 \
---transit-gateway-route-table-id $tgw_rt_id_us_east_1 \
---transit-gateway-attachment-id $tgw_attachment_id_us_east_1 \
---region us-east-1
-
-tgw_rt_id_eu_west_1=$(aws ec2 describe-transit-gateway-attachments \
---region eu-west-1 \
---filters Name=resource-type,Values=peering Name=state,Values=available \
---query "TransitGatewayAttachments[*].Association.TransitGatewayRouteTableId" \
---output text) 
-
-tgw_attachment_id_eu_west_1=$(aws ec2 describe-transit-gateway-attachments \
---region eu-west-1 \
---filters Name=resource-type,Values=peering Name=state,Values=available \
---query "TransitGatewayAttachments[*].TransitGatewayAttachmentId" \
---output text)
-
-aws ec2 create-transit-gateway-route \
---destination-cidr-block 172.16.0.0/24 \
---transit-gateway-route-table-id $tgw_rt_id_eu_west_1 \
---transit-gateway-attachment-id $tgw_attachment_id_eu_west_1 \
---region eu-west-1
-```
+To verify that that the Transit gateways are peered between the regions, proceed to the "Verification Steps" section below.
 
 ## Verification Steps
 
@@ -187,30 +131,33 @@ Select the EC2 instance in one of the regions and click on the Connect button. F
 ![Diagram](img/TGW_peering_CDK_connect_EC2.png)
 
 Perform a ping to the EC2 instance in the opposite region’s private IP address in order to confirm end-to-end network reachability:
+
 `ping [private IP address in opposite region]`
 
 If the ping packets are transmitted and received as in the next screenshot, congratulations! You’ve properly enabled transit gateway peering and validated end to end IP connectivity across.
 
 ![Diagram](img/TGW_peering_CDK_ping.png)
 
-If you are not seeing the received pings, go through the previous steps to ensure that you haven’t missed anything or made any misconfigurations.
+If you aren’t not seeing the received pings, go through the previous steps to ensure that you haven’t missed anything or made any misconfigurations.
 
 ## Cleanup
 
 Follow these steps to remove the resources that were deployed in this post.
 
-In the AWS Management Console, delete the static route with the “Peering Connection” resource type that was created in each region’s transit gateway’s route table:
+Step 1: Delete the two transit gateway routes that were created to send traffic across the peering connection and also delete the transit gateway peering connection:
 
-![Diagram](img/TGW_peering_CDK_delete_route.png)
+`python cleanup.py`
 
-Delete the transit gateway peering attachment in one of the regions:
+It will take a few minutes for the peering connection to be deleted. Run the following command to validate that the peering connection’s state is showing as “deleted” before proceeding to the next step:
 
-![Diagram](img/TGW_peering_CDK_delete_peering.png)
+`aws ec2 describe-transit-gateway-peering-attachments --region us-east-1`
 
-Terminate the rest of the resources with the following command:
+Step 2:  Terminate the rest of the resources with the following command: 
+
 `cdk destroy "*"`
 
-When asked to confirm the deletion of the four stacks, select `"y"`.
+When asked to confirm the deletion of the four stacks, select “`y`”.
+
 
 ## License
 
