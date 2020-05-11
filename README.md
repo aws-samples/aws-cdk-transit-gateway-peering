@@ -31,7 +31,7 @@ Step 2: Change directories to the new directory that was created:
 
 Step 2a: Copy the following json document to tell the AWS CDK which command to use to run your app. Note that this is for Windows only:
 
-Windows: `copy cdk-linux-windows.json cdk.json /Y`
+Windows: `copy cdk-windows.json cdk.json /Y`
 
 Step 3: Create a virtual environment:
 
