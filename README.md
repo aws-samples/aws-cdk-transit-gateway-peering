@@ -35,7 +35,7 @@ Windows: `copy cdk-linux-windows.json cdk.json /Y`
 
 Step 3: Create a virtual environment:
 
-MacOS/Linux: `python3 -m venv .env`
+MacOS/Linux: `python3 -m venv .env`<br />
 Windows: `python -m venv .env`
 
 Step 4: After the init process completes and the virtual environment is created, activate it:
