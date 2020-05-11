@@ -14,7 +14,7 @@ While the transit gateway only connects to VPCs within the same region, you can 
 
 Pre-requisites:
 
--	an [AWS account](https://aws.amazon.com/)
+-	an [AWS account](https://aws.amazon.com/) without any existing transit gateways in us-east-1 or eu-west-1
 -	[AWS CLI, authenticated and configured](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)
 -	[Python 3.6+](https://www.python.org/downloads/)
 -	[AWS SDK for Python (Boto3)](https://aws.amazon.com/sdk-for-python/)
@@ -28,6 +28,10 @@ Step 1: Using your device’s command line, check out our Git repository to a lo
 Step 2: Change directories to the new directory that was created:
 
 `cd aws-cdk-transit-gateway-peering/`
+
+Step 2a: Copy the following json document to tell the AWS CDK which command to use to run your app. Note that this is for Windows only:
+
+Windows: `copy cdk-linux-windows.json cdk.json /Y`
 
 Step 3: Create a virtual environment:
 
@@ -98,7 +102,8 @@ ec2_stack_eu_west_1.add_dependency(network_stack_eu_west_1)
 
 Step 8: Once the stacks have successfully been deployed, you’ll execute a series of Python scripts which were obtained when you checked out our Git repo during step 1. Python scripts are required as transit gateway peering is not yet natively supported by AWS CloudFormation. The first script establishes the transit gateway peering connection:
 
-`python create-tgw-peering.py`
+MacOS/Linux: `python3 create-tgw-peering.py`
+Windows: `python create-tgw-peering.py`
 
 Initially, the peering connection’s state change will show as “initiatingRequest” but it’ll only remain that way for less than a minute. Run the following command every so often and validate that the peering connection’s state is showing as “pendingAcceptance” before proceeding to the next step:
 
@@ -106,7 +111,8 @@ Initially, the peering connection’s state change will show as “initiatingReq
 
 Step 9: Accept the peering request:
 
-`python accept-tgw-peering.py`
+MacOS/Linux: `python3 accept-tgw-peering.py`
+Windows: `python accept-tgw-peering.py`
 
 Shortly after accepting the peering request, the peering connection’s state will show as “pending”. After a few minutes, run the following command every so often and ensure that the peering connection’s state is showing as “available” before moving on to step 10:
 
@@ -114,7 +120,8 @@ Shortly after accepting the peering request, the peering connection’s state wi
 
 Step 10: Once the peering connection has changed to “available”, add a route to the each of the transit gateways’ route table:
 
-`python create-tgw-routes.py`
+MacOS/Linux: `python3 create-tgw-routes.py`
+Windows: `python create-tgw-routes.py`
 
 To verify that that the Transit gateways are peered between the regions, proceed to the "Verification Steps" section below.
 
@@ -142,7 +149,8 @@ Follow these steps to remove the resources that were deployed in this post.
 
 Step 1: Delete the two transit gateway routes that were created to send traffic across the peering connection and also delete the transit gateway peering connection:
 
-`python cleanup.py`
+MacOS/Linux: `python3 cleanup.py`
+Windows: `python cleanup.py`
 
 It will take a few minutes for the peering connection to be deleted. Run the following command to validate that the peering connection’s state is showing as “deleted” before proceeding to the next step:
 
@@ -153,7 +161,6 @@ Step 2:  Terminate the rest of the resources with the following command:
 `cdk destroy "*"`
 
 When asked to confirm the deletion of the four stacks, select “`y`”.
-
 
 ## License
 
