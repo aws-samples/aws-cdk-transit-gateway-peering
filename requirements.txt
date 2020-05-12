@@ -4,6 +4,7 @@
 #
 #    pip-compile
 #
+boto3>=1.9.197            # for python scripts
 attrs==19.3.0             # via cattrs, jsii
 aws-cdk.aws-cloudwatch==1.34.1  # via aws-cdk.aws-ec2, aws-cdk.aws-logs
 aws-cdk.aws-ec2==1.34.1   # via -r requirements.in
