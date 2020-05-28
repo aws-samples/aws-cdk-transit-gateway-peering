@@ -27,7 +27,6 @@ response = client.create_transit_gateway_route(
     TransitGatewayRouteTableId=(tgw_rt_id_us_east_1),
     TransitGatewayAttachmentId=(tgw_attachment_id)
 )
-print(response)
 
 client = boto3.client('ec2', region_name='eu-west-1')
 
@@ -56,4 +55,3 @@ response = client.create_transit_gateway_route(
     TransitGatewayRouteTableId=(tgw_rt_id_eu_west_1),
     TransitGatewayAttachmentId=(tgw_attachment_id)
 )
-print(response)

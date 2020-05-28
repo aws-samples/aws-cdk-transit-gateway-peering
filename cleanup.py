@@ -25,7 +25,6 @@ response = client.delete_transit_gateway_route(
     DestinationCidrBlock='172.16.1.0/24',
     TransitGatewayRouteTableId=(tgw_rt_id_us_east_1)
 )
-print(response)
 
 client = boto3.client('ec2', region_name='eu-west-1')
 
@@ -53,9 +52,7 @@ response = client.delete_transit_gateway_route(
     DestinationCidrBlock='172.16.0.0/24',
     TransitGatewayRouteTableId=(tgw_rt_id_eu_west_1)
 )
-print(response)
 
 response = client.delete_transit_gateway_peering_attachment(
     TransitGatewayAttachmentId=(tgw_attachment_id)
 )
-print(response)

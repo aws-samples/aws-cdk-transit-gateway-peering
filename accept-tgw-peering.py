@@ -18,4 +18,3 @@ attachment_id=(query['TransitGatewayPeeringAttachments'][0]['TransitGatewayAttac
 response = client.accept_transit_gateway_peering_attachment(
     TransitGatewayAttachmentId=(attachment_id),
 )
-print(response)

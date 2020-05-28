@@ -37,4 +37,3 @@ response = client.create_transit_gateway_peering_attachment(
     PeerAccountId=(account_id),
     PeerRegion='us-east-1'
 )
-print(response)
